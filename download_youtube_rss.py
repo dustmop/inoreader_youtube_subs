@@ -12,8 +12,8 @@ def read_file(filename):
 def process():
   output_file = sys.argv[1]
   url = 'https://www.youtube.com/subscription_manager?action_takeout=1'
-  cookie = read_file('youtube.cookie')
-  user_agent = read_file('user-agent.dat')
+  cookie = read_file('user/youtube.cookie')
+  user_agent = read_file('user/user-agent.dat')
   headers = {
     'Host': 'www.youtube.com',
     'User-Agent': user_agent,

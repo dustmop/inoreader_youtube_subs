@@ -12,9 +12,9 @@ def read_file(filename):
 def process():
   input_file = sys.argv[1]
   url = 'https://www.inoreader.com/reader/subscriptions/import'
-  cookie = read_file('inoreader.cookie')
+  cookie = read_file('user/inoreader.cookie')
   subscriptions = read_file(input_file)
-  user_agent = read_file('user-agent.dat')
+  user_agent = read_file('user/user-agent.dat')
   headers = {
     'Host': 'www.inoreader.com',
     'User-Agent': user_agent,

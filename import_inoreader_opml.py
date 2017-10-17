@@ -1,5 +1,6 @@
-import requests
 import sys
+assert sys.version_info.major == 3, 'Need Python3'
+import requests
 
 
 def read_file(filename):
@@ -36,6 +37,4 @@ def process():
 
 
 if __name__ == '__main__':
-  if sys.version_info.major != 3:
-    raise RuntimeError('Need Python3')
   process()

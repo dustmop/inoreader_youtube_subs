@@ -77,7 +77,7 @@ class InoreaderService(object):
     if self.access_token and self.refresh_token:
       expire_time = int(self.expire_token)
       if time.time() >= expire_time:
-        raise NotImplementedError('Refresh access token')
+        self.refresh_tokens(self.refresh_token)
       return
     auth_code = self.get_auth_code()
     self.retrieve_tokens(auth_code)
@@ -86,6 +86,8 @@ class InoreaderService(object):
     url = 'https://www.inoreader.com/reader/api/0/subscription/list'
     headers = {'Authorization': 'Bearer %s' % self.access_token}
     res = requests.get(url, headers=headers)
+    if res.status_code >= 400:
+      raise RuntimeError(res.text)
     return res.json()
 
   def retrieve_tokens(self, auth_code):
@@ -100,7 +102,7 @@ class InoreaderService(object):
       'Content-type': 'application/x-www-form-urlencoded'
     }
     res = requests.post(url, payload, headers=headers)
-    if res.status_code == 400:
+    if res.status_code >= 400:
       raise RuntimeError(res.text)
     tokens = res.json()
     self.access_token = tokens['access_token']
@@ -108,6 +110,27 @@ class InoreaderService(object):
     write_file('app/inoreader.access', self.access_token)
     write_file('app/inoreader.refresh', self.refresh_token)
     write_file('app/inoreader.expire', str(int(time.time() + 3600)))
+
+  def refresh_tokens(self, refresh_token):
+    template = 'client_id={client_id}&client_secret={client_secret}&grant_type=refresh_token&refresh_token={refresh_token}'
+    data = {'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'refresh_token': refresh_token}
+    url = 'https://www.inoreader.com/oauth2/token'
+    payload = template.format(**data)
+    headers = {
+      'Content-type': 'application/x-www-form-urlencoded'
+    }
+    res = requests.post(url, payload, headers=headers)
+    if res.status_code >= 400:
+      raise RuntimeError(res.text)
+    tokens = res.json()
+    self.access_token = tokens['access_token']
+    self.refresh_token = tokens['refresh_token']
+    self.expiration = str(int(tokens['expires_in']) + int(time.time()))
+    write_file('app/inoreader.access', self.access_token)
+    write_file('app/inoreader.refresh', self.refresh_token)
+    write_file('app/inoreader.expire', self.expiration)
 
   def get_auth_code(self):
     template = 'https://www.inoreader.com/oauth2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={optional_scopes}&state={csrf_protection_string}'

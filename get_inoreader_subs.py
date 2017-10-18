@@ -70,6 +70,11 @@ class SingleHTTPServer(HTTPServer):
 
 class InoreaderService(object):
   def auth(self):
+    self.access_token = read_file('app/inoreader.access')
+    self.refresh_token = read_file('app/inoreader.refresh')
+    self.expire_token = read_file('app/inoreader.expire')
+    if self.access_token and self.refresh_token:
+      return
     auth_code = self.get_auth_code()
     self.retrieve_tokens(auth_code)
 
@@ -96,11 +101,10 @@ class InoreaderService(object):
     tokens = res.json()
     self.access_token = tokens['access_token']
     self.refresh_token = tokens['refresh_token']
+    write_file('app/inoreader.access', self.access_token)
+    write_file('app/inoreader.refresh', self.refresh_token)
 
   def get_auth_code(self):
-    auth_code = read_file('app/inoreader.code')
-    if auth_code:
-      return auth_code
     template = 'https://www.inoreader.com/oauth2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={optional_scopes}&state={csrf_protection_string}'
     data = {'client_id': CLIENT_ID,
             'redirect_uri': REDIRECT_URI,

@@ -158,9 +158,28 @@ def process():
   global _g_service
   _g_service = service
   service.auth()
+  # Get subscription, filter and sort.
+  tagged = []
+  untagged = []
   subs = service.get_subscriptions()
   for item in subs['subscriptions']:
-    print(item)
+    categories = [cat['label'] for cat in item['categories']]
+    categories.remove('YouTube Subscriptions')
+    if not categories:
+      untagged.append(item['title'])
+    else:
+      tagged.append((item['title'], categories))
+  tagged.sort(key=lambda x:x[0])
+  untagged.sort(key=lambda x:x[0])
+  # Display results
+  print('----------------------------------------')
+  print('-- Tagged subscriptions ----------------')
+  for title, categories in tagged:
+    print(title + ' - ' + str(categories))
+  print('----------------------------------------')
+  print('-- Untagged ----------------------------')
+  for title in untagged:
+    print(title)
 
 
 if __name__ == '__main__':

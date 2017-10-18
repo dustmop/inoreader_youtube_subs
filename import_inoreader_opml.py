@@ -33,7 +33,7 @@ def process():
     'import_file': (input_file, subscriptions, 'text/xml'),
   }
   r = requests.post(url, files=files, headers=headers)
-  print r.text
+  print(r.text)
 
 
 if __name__ == '__main__':

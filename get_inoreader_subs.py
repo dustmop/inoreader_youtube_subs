@@ -3,6 +3,7 @@ assert sys.version_info.major == 3, 'Need Python3'
 import requests
 import urllib
 import webbrowser
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -74,6 +75,9 @@ class InoreaderService(object):
     self.refresh_token = read_file('app/inoreader.refresh')
     self.expire_token = read_file('app/inoreader.expire')
     if self.access_token and self.refresh_token:
+      expire_time = int(self.expire_token)
+      if time.time() >= expire_time:
+        raise NotImplementedError('Refresh access token')
       return
     auth_code = self.get_auth_code()
     self.retrieve_tokens(auth_code)
@@ -103,6 +107,7 @@ class InoreaderService(object):
     self.refresh_token = tokens['refresh_token']
     write_file('app/inoreader.access', self.access_token)
     write_file('app/inoreader.refresh', self.refresh_token)
+    write_file('app/inoreader.expire', str(int(time.time() + 3600)))
 
   def get_auth_code(self):
     template = 'https://www.inoreader.com/oauth2/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={optional_scopes}&state={csrf_protection_string}'

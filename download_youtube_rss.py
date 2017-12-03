@@ -23,6 +23,9 @@ def process():
     'Cookie': cookie.strip(),
   }
   r = requests.get(url, headers=headers)
+  if r.status_code >= 400:
+    print('FAILED to download')
+    sys.exit(1)
   fout = open(output_file, 'w')
   fout.write(r.text)
   fout.close()

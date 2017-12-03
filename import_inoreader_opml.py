@@ -34,6 +34,9 @@ def process():
   }
   r = requests.post(url, files=files, headers=headers)
   print(r.text)
+  if r.status_code >= 400:
+    print('FAILED to import')
+    sys.exit(1)
 
 
 if __name__ == '__main__':

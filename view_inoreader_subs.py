@@ -1,5 +1,6 @@
 import sys
 assert sys.version_info.major == 3, 'Need Python3'
+import os
 import requests
 import urllib
 import webbrowser
@@ -123,6 +124,11 @@ class InoreaderService(object):
     }
     res = requests.post(url, payload, headers=headers)
     if res.status_code >= 400:
+      if 'Invalid refresh token' in res.text:
+        print(res.text)
+        print('Deleting old refresh token, please try again')
+        os.remove('app/inoreader.refresh')
+        sys.exit(1)
       raise RuntimeError(res.text)
     tokens = res.json()
     self.access_token = tokens['access_token']
